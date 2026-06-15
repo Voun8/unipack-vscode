@@ -42,11 +42,32 @@ jobs:
       - name: Package VSIX
         run: npx --yes @vscode/vsce package -o "unipack-vscode-${{ github.ref_name }}.vsix"
 
+      - name: Extract changelog
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          node -e '
+            const fs=require("fs");
+            const ver=(process.env.TAG||"").replace(/^v/,"");
+            const md=fs.existsSync("CHANGELOG.md")?fs.readFileSync("CHANGELOG.md","utf8"):"";
+            const lines=md.split(/\r?\n/);
+            let out=[],cap=false;
+            for(const l of lines){
+              if(/^##\s+\[/.test(l)){ if(cap) break; if(l.includes("["+ver+"]")){cap=true;continue;} }
+              else if(cap){ out.push(l); }
+            }
+            let body=out.join("\n").trim();
+            if(!body) body="Release "+ver;
+            fs.writeFileSync("RELEASE_NOTES.md", body+"\n");
+          '
+          echo "----- RELEASE_NOTES.md -----"
+          cat RELEASE_NOTES.md
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          body_path: RELEASE_NOTES.md
           files: "unipack-vscode-*.vsix"
-          generate_release_notes: true
 
       - name: Push tag to Gitee
         env:
@@ -62,11 +83,18 @@ jobs:
           REPO=unipack-vscode
           TAG="${GITHUB_REF_NAME}"
           VSIX="unipack-vscode-${TAG}.vsix"
+          # 删除同 tag 的旧 Release（保证可重复发布同一版本）
+          LIST=$(curl -s "https://gitee.com/api/v5/repos/${OWNER}/${REPO}/releases?access_token=${GITEE_TOKEN}&per_page=100")
+          OLD_ID=$(printf '%s' "$LIST" | TAG="$TAG" node -e "let s='';process.stdin.on('data',d=>s+=d);process.stdin.on('end',()=>{try{const a=JSON.parse(s);const r=a.find(x=>x.tag_name===process.env.TAG);process.stdout.write(r?String(r.id):'')}catch(e){process.stdout.write('')}})")
+          if [ -n "$OLD_ID" ]; then
+            echo "删除旧 Gitee Release $OLD_ID"
+            curl -s -X DELETE "https://gitee.com/api/v5/repos/${OWNER}/${REPO}/releases/${OLD_ID}?access_token=${GITEE_TOKEN}" > /dev/null
+          fi
           RESP=$(curl -s -X POST "https://gitee.com/api/v5/repos/${OWNER}/${REPO}/releases" \
             -F "access_token=${GITEE_TOKEN}" \
             -F "tag_name=${TAG}" \
             -F "name=${TAG}" \
-            -F "body=Automated release ${TAG}" \
+            -F "body=<RELEASE_NOTES.md" \
             -F "target_commitish=main")
           echo "create release resp: $RESP"
           RELEASE_ID=$(printf '%s' "$RESP" | node -e "let s='';process.stdin.on('data',d=>s+=d);process.stdin.on('end',()=>{try{process.stdout.write(String(JSON.parse(s).id||''))}catch(e){process.stdout.write('')}})")
