@@ -1,0 +1,20 @@
+name: Mirror to Gitee
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (full history)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Push main to Gitee
+        env:
+          GITEE_TOKEN: ${{ secrets.GITEE_TOKEN }}
+        run: |
+          git push --force "https://vvvon:${GITEE_TOKEN}@gitee.com/vvvon/unipack-vscode.git" "+refs/remotes/origin/main:refs/heads/main"

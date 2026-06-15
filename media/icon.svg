@@ -1,0 +1,41 @@
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="box" x1="30" y1="34" x2="92" y2="96" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F8B765"/>
+      <stop offset="1" stop-color="#D98635"/>
+    </linearGradient>
+    <linearGradient id="checkBg" x1="73" y1="71" x2="108" y2="106" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#67D84C"/>
+      <stop offset="1" stop-color="#28A745"/>
+    </linearGradient>
+    <filter id="shadow" x="12" y="14" width="110" height="105" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#000" flood-opacity="0.16"/>
+    </filter>
+  </defs>
+
+  <g filter="url(#shadow)">
+    <!-- package body -->
+    <path d="M27 46.5C27 42.9 29.9 40 33.5 40H84.5C88.1 40 91 42.9 91 46.5V91.5C91 95.1 88.1 98 84.5 98H33.5C29.9 98 27 95.1 27 91.5V46.5Z" fill="url(#box)" stroke="#5A341B" stroke-width="4" stroke-linejoin="round"/>
+
+    <!-- top flaps -->
+    <path d="M33 40L45 26H96L84 40H33Z" fill="#FBC47D" stroke="#5A341B" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M84 40L96 26L103 40V84L91 98V46.5C91 42.9 88.1 40 84.5 40H84Z" fill="#C97831" stroke="#5A341B" stroke-width="4" stroke-linejoin="round"/>
+
+    <!-- tape -->
+    <path d="M56 26H72L65 40H49L56 26Z" fill="#F5E7D1" stroke="#5A341B" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M49 40H65V68L57 63L49 68V40Z" fill="#F5E7D1" stroke="#5A341B" stroke-width="3" stroke-linejoin="round"/>
+
+    <!-- shipping marks -->
+    <path d="M38 58V75" stroke="#5A341B" stroke-width="4" stroke-linecap="round"/>
+    <path d="M32 64L38 58L44 64" stroke="#5A341B" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M31 77H45" stroke="#5A341B" stroke-width="4" stroke-linecap="round"/>
+    <path d="M51 58H64C64 66 61.5 70 57.5 70C53.5 70 51 66 51 58Z" fill="#5A341B"/>
+    <path d="M57.5 70V77" stroke="#5A341B" stroke-width="4" stroke-linecap="round"/>
+    <path d="M52 77H63" stroke="#5A341B" stroke-width="4" stroke-linecap="round"/>
+
+    <!-- check badge -->
+    <circle cx="90" cy="89" r="25" fill="#3B2A24"/>
+    <circle cx="90" cy="89" r="19" fill="url(#checkBg)"/>
+    <path d="M79 89L87 97L103 80" stroke="#E9FFE4" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>

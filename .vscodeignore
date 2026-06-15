@@ -1,0 +1,15 @@
+.vscode/**
+.vscode-test/**
+src/**
+out/test/**
+.gitignore
+.yarnrc
+vsc-extension-quickstart.md
+ABOUT.md
+PUBLISH.md
+.github/**
+**/tsconfig.json
+**/eslint.config.mjs
+**/*.map
+**/*.ts
+**/.vscode-test.*

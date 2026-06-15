@@ -1,0 +1,82 @@
+{
+  "name": "unipack-vscode",
+  "displayName": "UniPack VSCode",
+  "description": "Build uni-app via HBuilderX bundled compiler from a VSCode sidebar.",
+  "version": "0.1.0",
+  "publisher": "unipack-vscode",
+  "author": "morty",
+  "license": "MIT",
+  "icon": "media/icon.png",
+  "repository": { "type": "git", "url": "https://github.com/Voun8/unipack-vscode.git" },
+  "bugs": { "url": "https://github.com/Voun8/unipack-vscode/issues" },
+  "homepage": "https://github.com/Voun8/unipack-vscode#readme",
+  "keywords": ["uni-app", "uniapp", "HBuilderX", "vue", "h5", "wgt", "mp-weixin", "build", "pack"],
+  "engines": { "vscode": "^1.75.0" },
+  "categories": ["Other"],
+  "main": "./out/extension.js",
+  "activationEvents": ["onStartupFinished"],
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        { "id": "hbxPack", "title": "HBX Pack", "icon": "media/icon.svg" }
+      ]
+    },
+    "views": {
+      "hbxPack": [
+        { "type": "webview", "id": "hbxPackView", "name": "uni-app Pack" }
+      ]
+    },
+    "commands": [
+      { "command": "hbxPack.menu", "title": "HBX: Menu", "category": "HBX" },
+      { "command": "hbxPack.buildH5", "title": "HBX: Build H5 (release)", "category": "HBX" },
+      { "command": "hbxPack.buildApp", "title": "HBX: Build App resources (release)", "category": "HBX" },
+      { "command": "hbxPack.packWgt", "title": "HBX: Pack wgt", "category": "HBX" },
+      { "command": "hbxPack.buildMpWeixin", "title": "HBX: Build WeChat MiniProgram", "category": "HBX" },
+      { "command": "hbxPack.serveH5", "title": "HBX: Debug H5 (dev)", "category": "HBX" },
+      { "command": "hbxPack.diagnose", "title": "HBX: Diagnose", "category": "HBX" },
+      { "command": "hbxPack.showOutput", "title": "HBX: Show Output", "category": "HBX" },
+      { "command": "hbxPack.setHbxPath", "title": "HBX: Set HBuilderX Path", "category": "HBX" },
+      { "command": "hbxPack.setProjectDir", "title": "HBX: Set Project Dir", "category": "HBX" },
+      { "command": "hbxPack.setVueVersion", "title": "HBX: Set Vue Version", "category": "HBX" },
+      { "command": "hbxPack.setAppPlatform", "title": "HBX: Set App Platform", "category": "HBX" },
+      { "command": "hbxPack.refreshView", "title": "Refresh", "icon": "$(refresh)", "category": "HBX" }
+    ],
+    "menus": {
+      "view/title": [
+        { "command": "hbxPack.refreshView", "when": "view == hbxPackView", "group": "navigation" }
+      ]
+    },
+    "configuration": {
+      "title": "HBX uni-app Pack",
+      "properties": {
+        "hbxPack.hbuilderxPath": { "type": "string", "default": "", "description": "HBuilderX install dir; empty = auto detect" },
+        "hbxPack.projectDir": { "type": "string", "default": "", "description": "uni-app project root; empty = current workspace" },
+        "hbxPack.nodeMemoryMB": { "type": "number", "default": 4096, "description": "compile memory limit (MB)" },
+        "hbxPack.vueVersion": { "type": "string", "enum": ["auto", "2", "3"], "default": "auto", "description": "compiler: auto / 2 / 3" },
+        "hbxPack.appPlatformName": { "type": "string", "default": "auto", "description": "app platform id; auto = app-plus / app" },
+        "hbxPack.extraEnv": { "type": "object", "default": {}, "description": "extra compile env vars" }
+      }
+    },
+    "taskDefinitions": [
+      { "type": "hbx-pack", "required": ["platform"], "properties": { "platform": { "type": "string" }, "mode": { "type": "string", "enum": ["production", "development"] } } }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.75.0",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "22.x",
+    "typescript-eslint": "^8.56.1",
+    "eslint": "^9.39.3",
+    "typescript": "^5.9.3",
+    "@vscode/test-cli": "^0.0.12",
+    "@vscode/test-electron": "^2.5.2"
+  }
+}

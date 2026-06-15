@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline';">
+<style>
+  :root { color-scheme: light dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 10px;
+    color: var(--vscode-foreground);
+    background: var(--vscode-sideBar-background);
+    font-family: var(--vscode-font-family);
+    font-size: 12px;
+    line-height: 1.4;
+  }
+  .shell { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+  .hero {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    padding: 10px;
+    border: 1px solid var(--vscode-panel-border);
+    border-radius: 8px;
+    background: var(--vscode-editorWidget-background);
+  }
+  .logo {
+    display: grid;
+    place-items: center;
+    flex: 0 0 34px;
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    color: var(--vscode-button-foreground);
+    background: var(--vscode-button-background);
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .brand { min-width: 0; }
+  .title {
+    overflow-wrap: anywhere;
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .subtitle {
+    margin-top: 2px;
+    color: var(--vscode-descriptionForeground);
+    font-size: 11px;
+  }
+  .section {
+    overflow: hidden;
+    border: 1px solid var(--vscode-panel-border);
+    border-radius: 8px;
+    background: var(--vscode-editor-background);
+  }
+  .section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 9px;
+    border-bottom: 1px solid var(--vscode-panel-border);
+    background: var(--vscode-sideBarSectionHeader-background);
+  }
+  .section-title {
+    color: var(--vscode-foreground);
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .section-tag {
+    color: var(--vscode-descriptionForeground);
+    font-size: 10px;
+  }
+  .section-body {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    padding: 8px;
+  }
+  button {
+    border: 0;
+    font: inherit;
+  }
+  .action {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    min-height: 44px;
+    padding: 7px 8px;
+    border: 1px solid transparent;
+    border-radius: 7px;
+    color: var(--vscode-button-secondaryForeground);
+    background: var(--vscode-button-secondaryBackground);
+    cursor: pointer;
+    text-align: left;
+  }
+  .action:hover {
+    color: var(--vscode-foreground);
+    border-color: var(--vscode-focusBorder);
+    background: var(--vscode-list-hoverBackground);
+  }
+  .action:focus-visible,
+  .field input:focus,
+  .field select:focus {
+    outline: 1px solid var(--vscode-focusBorder);
+    outline-offset: 1px;
+  }
+  .action.primary {
+    color: var(--vscode-button-foreground);
+    background: var(--vscode-button-background);
+  }
+  .action.primary:hover {
+    color: var(--vscode-button-foreground);
+    background: var(--vscode-button-hoverBackground);
+  }
+  .icon {
+    display: grid;
+    place-items: center;
+    flex: 0 0 28px;
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
+    color: var(--vscode-badge-foreground);
+    background: var(--vscode-badge-background);
+    font-size: 10px;
+    font-weight: 700;
+  }
+  .primary .icon {
+    color: inherit;
+    border: 1px solid rgba(255, 255, 255, .2);
+    background: rgba(255, 255, 255, .16);
+  }
+  .action-text {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+  }
+  .action-text strong {
+    color: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+  }
+  .action-text small {
+    color: currentColor;
+    font-size: 10px;
+    opacity: .78;
+    overflow-wrap: anywhere;
+  }
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+  }
+  .field label {
+    color: var(--vscode-descriptionForeground);
+    font-size: 11px;
+  }
+  .field input,
+  .field select {
+    width: 100%;
+    min-height: 28px;
+    padding: 5px 7px;
+    border: 1px solid var(--vscode-input-border);
+    border-radius: 6px;
+    color: var(--vscode-input-foreground);
+    background: var(--vscode-input-background);
+    font: inherit;
+  }
+  .save {
+    justify-content: center;
+    min-height: 34px;
+    text-align: center;
+  }
+  .tool-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 7px;
+  }
+  .tool-grid .action {
+    min-height: 38px;
+    padding: 7px;
+  }
+  .tool-grid .icon {
+    flex-basis: 24px;
+    width: 24px;
+    height: 24px;
+  }
+  #status {
+    min-height: 38px;
+    padding: 8px 9px;
+    border: 1px solid var(--vscode-panel-border);
+    border-radius: 8px;
+    color: var(--vscode-descriptionForeground);
+    background: var(--vscode-textCodeBlock-background);
+    font-size: 11px;
+    line-height: 1.45;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+</style>
+</head>
+<body>
+  <main class="shell">
+    <header class="hero">
+      <div class="logo">HBX</div>
+      <div class="brand">
+        <div class="title">uni-app Pack</div>
+        <div class="subtitle">HBuilderX 编译工具</div>
+      </div>
+    </header>
+
+    <section class="section">
+      <div class="section-head">
+        <div class="section-title">常用操作</div>
+        <div class="section-tag">Build</div>
+      </div>
+      <div class="section-body">
+        <button class="action primary" data-cmd="hbxPack.buildH5">
+          <span class="icon">H5</span>
+          <span class="action-text"><strong>打包 H5</strong><small>网站发行构建</small></span>
+        </button>
+        <button class="action primary" data-cmd="hbxPack.buildApp">
+          <span class="icon">APP</span>
+          <span class="action-text"><strong>生成 App 资源</strong><small>本地打包资源</small></span>
+        </button>
+        <button class="action" data-cmd="hbxPack.serveH5">
+          <span class="icon">DBG</span>
+          <span class="action-text"><strong>调试 H5</strong><small>开发 / 热更</small></span>
+        </button>
+        <button class="action" data-cmd="hbxPack.buildMpWeixin">
+          <span class="icon">MP</span>
+          <span class="action-text"><strong>微信小程序</strong><small>发行构建</small></span>
+        </button>
+        <button class="action" data-cmd="hbxPack.packWgt">
+          <span class="icon">WGT</span>
+          <span class="action-text"><strong>打包 wgt</strong><small>基于 App 资源</small></span>
+        </button>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div class="section-title">配置</div>
+        <div class="section-tag">Settings</div>
+      </div>
+      <div class="section-body">
+        <div class="field">
+          <label for="hbuilderxPath">HBuilderX 路径</label>
+          <input id="hbuilderxPath" placeholder="留空自动探测">
+        </div>
+        <div class="field">
+          <label for="projectDir">项目目录</label>
+          <input id="projectDir" placeholder="留空使用当前工作区">
+        </div>
+        <div class="field">
+          <label for="vueVersion">Vue 版本</label>
+          <select id="vueVersion">
+            <option value="auto">auto(读取 manifest)</option>
+            <option value="2">2(webpack)</option>
+            <option value="3">3(vite)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="appPlatformName">App 平台标识</label>
+          <input id="appPlatformName" placeholder="auto">
+        </div>
+        <button class="action primary save" id="saveCfg">
+          <span class="action-text"><strong>保存配置</strong></span>
+        </button>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div class="section-title">工具</div>
+        <div class="section-tag">Tools</div>
+      </div>
+      <div class="section-body">
+        <div class="tool-grid">
+          <button class="action" data-cmd="hbxPack.diagnose">
+            <span class="icon">ENV</span>
+            <span class="action-text"><strong>诊断</strong></span>
+          </button>
+          <button class="action" data-cmd="hbxPack.showOutput">
+            <span class="icon">LOG</span>
+            <span class="action-text"><strong>输出</strong></span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <div id="status">就绪</div>
+  </main>
+
+<script>
+  const vscode = acquireVsCodeApi();
+  document.querySelectorAll('button[data-cmd]').forEach(function (b) {
+    b.addEventListener('click', function () { vscode.postMessage({ type: 'cmd', command: b.dataset.cmd }); });
+  });
+  document.getElementById('saveCfg').addEventListener('click', function () {
+    vscode.postMessage({ type: 'saveConfig', values: {
+      hbuilderxPath: document.getElementById('hbuilderxPath').value,
+      projectDir: document.getElementById('projectDir').value,
+      vueVersion: document.getElementById('vueVersion').value,
+      appPlatformName: document.getElementById('appPlatformName').value
+    }});
+  });
+  window.addEventListener('message', function (e) {
+    const m = e.data || {};
+    if (m.type === 'config') {
+      document.getElementById('hbuilderxPath').value = m.values.hbuilderxPath || '';
+      document.getElementById('projectDir').value = m.values.projectDir || '';
+      document.getElementById('vueVersion').value = m.values.vueVersion || 'auto';
+      document.getElementById('appPlatformName').value = m.values.appPlatformName || 'auto';
+    } else if (m.type === 'status') {
+      document.getElementById('status').textContent = m.text;
+    }
+  });
+  vscode.postMessage({ type: 'ready' });
+</script>
+</body>
+</html>

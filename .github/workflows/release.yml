@@ -1,0 +1,82 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Verify tag matches package.json version
+        run: |
+          PKG_VERSION=$(node -p "require('./package.json').version")
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          echo "package.json=$PKG_VERSION  tag=$TAG_VERSION"
+          if [ "$PKG_VERSION" != "$TAG_VERSION" ]; then
+            echo "::error::Tag '$GITHUB_REF_NAME' 与 package.json version '$PKG_VERSION' 不一致"
+            exit 1
+          fi
+
+      - name: Compile
+        run: npm run compile
+
+      - name: Package VSIX
+        run: npx --yes @vscode/vsce package -o "unipack-vscode-${{ github.ref_name }}.vsix"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: "unipack-vscode-*.vsix"
+          generate_release_notes: true
+
+      - name: Push tag to Gitee
+        env:
+          GITEE_TOKEN: ${{ secrets.GITEE_TOKEN }}
+        run: |
+          git push --force "https://vvvon:${GITEE_TOKEN}@gitee.com/vvvon/unipack-vscode.git" "refs/tags/${GITHUB_REF_NAME}"
+
+      - name: Create Gitee Release with vsix
+        env:
+          GITEE_TOKEN: ${{ secrets.GITEE_TOKEN }}
+        run: |
+          OWNER=vvvon
+          REPO=unipack-vscode
+          TAG="${GITHUB_REF_NAME}"
+          VSIX="unipack-vscode-${TAG}.vsix"
+          RESP=$(curl -s -X POST "https://gitee.com/api/v5/repos/${OWNER}/${REPO}/releases" \
+            -F "access_token=${GITEE_TOKEN}" \
+            -F "tag_name=${TAG}" \
+            -F "name=${TAG}" \
+            -F "body=Automated release ${TAG}" \
+            -F "target_commitish=main")
+          echo "create release resp: $RESP"
+          RELEASE_ID=$(printf '%s' "$RESP" | node -e "let s='';process.stdin.on('data',d=>s+=d);process.stdin.on('end',()=>{try{process.stdout.write(String(JSON.parse(s).id||''))}catch(e){process.stdout.write('')}})")
+          if [ -z "$RELEASE_ID" ]; then
+            echo "::error::创建 Gitee Release 失败: $RESP"
+            exit 1
+          fi
+          echo "Gitee release id: $RELEASE_ID"
+          echo "Uploading $VSIX ..."
+          curl -s -X POST "https://gitee.com/api/v5/repos/${OWNER}/${REPO}/releases/${RELEASE_ID}/attach_files" \
+            -F "access_token=${GITEE_TOKEN}" \
+            -F "file=@${VSIX}" | head -c 800
+          echo ""
