@@ -314,12 +314,13 @@
   window.addEventListener('message', function (e) {
     const m = e.data || {};
     if (m.type === 'config') {
-      document.getElementById('hbuilderxPath').value = m.values.hbuilderxPath || '';
-      document.getElementById('projectDir').value = m.values.projectDir || '';
-      document.getElementById('vueVersion').value = m.values.vueVersion || 'auto';
-      document.getElementById('appPlatformName').value = m.values.appPlatformName || 'auto';
+      const v = m.values || {};
+      document.getElementById('hbuilderxPath').value = v.hbuilderxPath || '';
+      document.getElementById('projectDir').value = v.projectDir || '';
+      document.getElementById('vueVersion').value = v.vueVersion || 'auto';
+      document.getElementById('appPlatformName').value = v.appPlatformName || 'auto';
     } else if (m.type === 'status') {
-      document.getElementById('status').textContent = m.text;
+      document.getElementById('status').textContent = m.text || '';
     }
   });
   vscode.postMessage({ type: 'ready' });

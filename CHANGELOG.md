@@ -4,6 +4,20 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/)，版本号遵循 [SemVer](https://semver.org/lang/zh-CN/)。
 
+## [0.1.1] - 2026-06-16
+
+本次为缺陷修复 + 内部重构版本，对外行为保持不变（除下述修复）。
+
+### 修复
+
+- `manifest.json` 解析失败时不再静默退化为默认 appid / Vue 版本（原会导致输出目录、wgt 文件名、编译入口选错而静默打出错误包），改为明确报错并中止。
+
+### 变更
+
+- 内部重构（行为等价）：单文件 `extension.ts`（约 645 行）按职责拆分为 8 个模块（output / config / project / build / sidebar / tasks / commands / extension）。
+- 命令、菜单、任务的平台 / 模式 / 文案收敛为单一声明源（`PACK_ACTIONS`），避免三处文案漂移。
+- 打包子进程隐藏控制台窗口（`windowsHide`）；侧栏状态栏改为显示完整的最近一行编译输出。
+
 ## [0.1.0] - 2026-06-15
 
 ### 新增

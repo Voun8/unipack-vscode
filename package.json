@@ -2,7 +2,7 @@
   "name": "unipack-vscode",
   "displayName": "UniPack VSCode",
   "description": "Build uni-app via HBuilderX bundled compiler from a VSCode sidebar.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publisher": "unipack-vscode",
   "author": "morty",
   "license": "MIT",
