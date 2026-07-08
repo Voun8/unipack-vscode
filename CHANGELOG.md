@@ -4,6 +4,20 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/)，版本号遵循 [SemVer](https://semver.org/lang/zh-CN/)。
 
+## [0.2.0] - 2026-07-08
+
+### 新增
+
+- 支持登记多个 HBuilderX 版本路径（`hbxPack.hbuilderxPaths`，全局级）：离线打包 SDK 与 HBuilderX 版本绑定、无法统一升级时，不同项目可各自选用版本。
+  - `hbxPack.hbuilderxPath` 改为按项目（工作区）保存，表示本项目使用的版本；留空自动探测（先查版本列表，再查常见安装位置）。原全局配置仍可读到，向后兼容。
+  - `HBX: Set HBuilderX Path` 命令改为版本选择器：从已登记列表选择 / 自动探测 / 添加新路径（校验含 `plugins\node\node.exe` 后登记）。
+  - 侧边栏「HBuilderX 路径」输入框支持下拉选择已登记版本；保存时新的有效路径自动登记进全局列表。
+  - 环境诊断输出已登记版本列表及各项有效性。
+
+### 变更
+
+- 调试 H5 改为经任务终端启动 dev server(原经 Node 调试器启动):终端不再逐条回显环境变量,也不再出现调试器注入的 `NODE_OPTIONS` / `VSCODE_INSPECTOR_OPTIONS` 与 `Debugger attached` 提示。页面调试本就在浏览器进行,不受影响。
+
 ## [0.1.1] - 2026-06-16
 
 本次为缺陷修复 + 内部重构版本，对外行为保持不变（除下述修复）。

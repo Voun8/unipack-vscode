@@ -120,8 +120,8 @@ function appendRunHeader(platform: string, friendlyName: string, ctx: Ctx, spec:
   out().appendLine('========================================');
 }
 
-// runBuild / runDebug 共享前导:解析上下文 -> 构建 spec -> 校验编译入口 -> 写表头
-function prepare(platform: string, mode: string, friendlyName: string): { ctx: Ctx; spec: BuildSpec } | null {
+// runBuild / 任务启动(tasks.runDebug)共享前导:解析上下文 -> 构建 spec -> 校验编译入口 -> 写表头
+export function prepare(platform: string, mode: string, friendlyName: string): { ctx: Ctx; spec: BuildSpec } | null {
   const ctx = resolveContext(false);
   if (!ctx) {
     return null;
@@ -201,56 +201,3 @@ export function runBuild(platform: string, mode: string, friendlyName: string): 
   });
 }
 
-function debugArgsOf(spec: BuildSpec): { runtimeArgs: string[]; args: string[] } {
-  const entryIndex = spec.args.indexOf(spec.entry);
-  if (entryIndex === -1) {
-    return { runtimeArgs: [], args: spec.args };
-  }
-  return {
-    runtimeArgs: spec.args.slice(0, entryIndex),
-    args: spec.args.slice(entryIndex + 1)
-  };
-}
-
-export async function runDebug(platform: string, friendlyName: string): Promise<void> {
-  const prep = prepare(platform, 'development', friendlyName);
-  if (!prep) {
-    return;
-  }
-  const { ctx, spec } = prep;
-
-  const debugArgs = debugArgsOf(spec);
-  const workspaceFolder = vscode.workspace.getWorkspaceFolder(vscode.Uri.file(ctx.projectDir));
-  const debugConfig: vscode.DebugConfiguration = {
-    type: 'node',
-    request: 'launch',
-    name: friendlyName,
-    runtimeExecutable: spec.program,
-    runtimeArgs: debugArgs.runtimeArgs,
-    program: spec.entry,
-    args: debugArgs.args,
-    cwd: spec.cwd,
-    env: spec.env,
-    console: 'integratedTerminal',
-    internalConsoleOptions: 'neverOpen',
-    outputCapture: 'std',
-    skipFiles: ['<node_internals>/**']
-  };
-
-  postStatus(friendlyName + '\n正在启动 VS Code 调试终端...');
-  try {
-    const started = await vscode.debug.startDebugging(workspaceFolder, debugConfig);
-    if (started) {
-      out().appendLine('[HBX] 已启动 VS Code 调试: ' + friendlyName);
-      postStatus(friendlyName + '\n调试已启动,请在终端查看 H5 服务地址');
-    } else {
-      out().appendLine('[HBX] VS Code 调试启动被取消或失败');
-      postStatus(friendlyName + '\n调试启动失败或已取消');
-      vscode.window.showErrorMessage(friendlyName + ' 启动失败,请查看调试面板。');
-    }
-  } catch (e: any) {
-    out().appendLine('[HBX] VS Code 调试启动异常: ' + e.message);
-    postStatus(friendlyName + '\n调试启动异常:' + e.message);
-    vscode.window.showErrorMessage(friendlyName + ' 启动异常:' + e.message);
-  }
-}

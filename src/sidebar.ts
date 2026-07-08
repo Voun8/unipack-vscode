@@ -1,7 +1,8 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
-import { cfg, configValues, targetForWorkspace } from './config';
+import { cfg, configValues, targetForWorkspace, addHbxPathToList } from './config';
+import { isValidHbxRoot } from './project';
 
 // 侧边栏 Webview 的可见性收敛在本模块内,对外只暴露 postStatus / postConfigToView
 let sidebarView: vscode.WebviewView | null = null;
@@ -20,8 +21,13 @@ export function postStatus(text: string): void {
 
 async function saveConfigFromView(values: any): Promise<void> {
   const c = cfg();
-  await c.update('hbuilderxPath', (values.hbuilderxPath || '').trim(), vscode.ConfigurationTarget.Global);
   const target = targetForWorkspace();
+  // 路径按项目(工作区)保存,支持多项目各用不同 HBuilderX 版本;新的有效路径自动登记进全局版本列表
+  const hbxPath = (values.hbuilderxPath || '').trim();
+  await c.update('hbuilderxPath', hbxPath, target);
+  if (isValidHbxRoot(hbxPath)) {
+    await addHbxPathToList(hbxPath);
+  }
   await c.update('projectDir', (values.projectDir || '').trim(), target);
   await c.update('vueVersion', values.vueVersion || 'auto', target);
   await c.update('appPlatformName', (values.appPlatformName || '').trim() || 'auto', target);

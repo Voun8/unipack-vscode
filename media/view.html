@@ -251,8 +251,9 @@
       </div>
       <div class="section-body">
         <div class="field">
-          <label for="hbuilderxPath">HBuilderX 路径</label>
-          <input id="hbuilderxPath" placeholder="留空自动探测">
+          <label for="hbuilderxPath">HBuilderX 路径(本项目)</label>
+          <input id="hbuilderxPath" list="hbxPathOptions" placeholder="留空自动探测;可选已登记版本">
+          <datalist id="hbxPathOptions"></datalist>
         </div>
         <div class="field">
           <label for="projectDir">项目目录</label>
@@ -316,6 +317,13 @@
     if (m.type === 'config') {
       const v = m.values || {};
       document.getElementById('hbuilderxPath').value = v.hbuilderxPath || '';
+      const dl = document.getElementById('hbxPathOptions');
+      dl.textContent = '';
+      (v.hbuilderxPaths || []).forEach(function (p) {
+        const o = document.createElement('option');
+        o.value = p;
+        dl.appendChild(o);
+      });
       document.getElementById('projectDir').value = v.projectDir || '';
       document.getElementById('vueVersion').value = v.vueVersion || 'auto';
       document.getElementById('appPlatformName').value = v.appPlatformName || 'auto';

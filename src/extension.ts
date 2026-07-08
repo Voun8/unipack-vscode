@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
 import { out } from './output';
 import { postConfigToView, createViewProvider } from './sidebar';
-import { runBuild, runDebug, PACK_ACTIONS } from './build';
-import { TASK_TYPE, taskProvider } from './tasks';
+import { runBuild, PACK_ACTIONS } from './build';
+import { TASK_TYPE, taskProvider, runDebug } from './tasks';
 import {
   cmdMenu, cmdBuildApp, cmdPackWgt, cmdDiagnose, cmdShowOutput,
   cmdSetHbxPath, cmdSetProjectDir, cmdSetVueVersion, cmdSetAppPlatform

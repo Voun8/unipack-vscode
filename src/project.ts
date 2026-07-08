@@ -18,8 +18,10 @@ export function isValidHbxRoot(root: string): boolean {
 }
 
 export function detectHbxRoot(): string | null {
+  // 优先级:本项目指定路径 > 已登记版本列表 > 常见安装位置 / 环境变量
   const candidates = [
     (cfg().get<string>('hbuilderxPath') || '').trim(),
+    ...(cfg().get<string[]>('hbuilderxPaths') || []).map(p => (p || '').trim()),
     'D:\\App\\devlopTool\\HBuilderX',
     'C:\\Program Files\\HBuilderX',
     'C:\\Program Files (x86)\\HBuilderX',

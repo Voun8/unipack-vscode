@@ -1,8 +1,17 @@
+# 依赖
 node_modules
+
+# 构建产物
 out
 dist
-.vscode-test
+build
 *.vsix
+
+# 测试
+.vscode-test
+
+# 本地工具 / AI 助手目录
+.claude/
 
 # 仅本地参考，不纳入仓库
 ABOUT.md

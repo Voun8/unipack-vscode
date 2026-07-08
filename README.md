@@ -15,7 +15,7 @@
 | 发行 → 网站-PC Web / 手机 H5 | `HBX: Build H5 (release)` | `UNI_PLATFORM=h5` + `NODE_ENV=production` 编译 |
 | 发行 → App 本地打包 → 生成本地打包 App 资源 | `HBX: Build App resources (release)` | `UNI_PLATFORM=app-plus`(vue2) / `app`(vue3) + `NODE_ENV=production` 编译 |
 | App 资源 → 打 wgt | `HBX: Pack wgt` | 把 App 资源目录压成 `.wgt`（zip） |
-| 运行 → 运行到浏览器 | `HBX: Debug H5 (dev)` | `NODE_ENV=development`，经 VS Code 调试终端启动（webpack 走 serve / vite 走 dev） |
+| 运行 → 运行到浏览器 | `HBX: Debug H5 (dev)` | `NODE_ENV=development`，在任务终端启动 dev server（webpack 走 serve / vite 走 dev） |
 | 发行 → 微信小程序 | `HBX: Build WeChat MiniProgram` | `UNI_PLATFORM=mp-weixin` 编译 |
 
 另提供 `HBX: Diagnose`（环境诊断）、`HBX: Show Output`（输出面板）及一组配置命令。
@@ -59,11 +59,19 @@ code --install-extension unipack-vscode-0.1.0.vsix
 
 之后 `Ctrl+Shift+B` 选任务即可；也可在 `launch.json` 用 `preLaunchTask` 引用，实现「调试前自动打包」。
 
+### 多版本 HBuilderX
+
+离线打包 SDK 与生成它的 HBuilderX 版本绑定，升级 HBuilderX 会导致旧项目资源与 SDK 不匹配。因此支持共存多个 HBuilderX 版本：
+
+1. 通过 `HBX: Set HBuilderX Path` 命令「添加新版本路径」，或在设置里编辑 `hbxPack.hbuilderxPaths`（全局列表）。
+2. 每个项目在侧边栏「HBuilderX 路径」下拉选择自己的版本（保存到工作区配置），互不影响。
+
 ## 配置项（settings.json）
 
 | 配置 | 默认 | 说明 |
 |---|---|---|
-| `hbxPack.hbuilderxPath` | 空 | HBuilderX 安装目录；留空自动探测常见路径 |
+| `hbxPack.hbuilderxPath` | 空 | 本项目使用的 HBuilderX 安装目录（工作区级）；留空自动探测：先查 `hbuilderxPaths` 列表，再查常见路径 |
+| `hbxPack.hbuilderxPaths` | `[]` | 已登记的多个 HBuilderX 版本目录（全局级）；离线打包 SDK 与 HBuilderX 版本绑定时，各项目可分别选用 |
 | `hbxPack.projectDir` | 空 | 项目根目录；留空用当前工作区 |
 | `hbxPack.vueVersion` | `auto` | `auto` / `2` / `3`，强制编译器 |
 | `hbxPack.appPlatformName` | `auto` | App 平台标识，auto 按 vue 版本取 `app-plus` / `app` |
@@ -104,15 +112,14 @@ npm test         # vscode-test
 ## 发布
 
 ```
-npm install -g @vscode/vsce
-vsce package                 # 生成 unipack-vscode-<version>.vsix
+npm run package              # 清空 build/ 后生成 build/unipack-vscode-<version>.vsix
 vsce publish                 # 需先 vsce login <publisher>
 ```
 
 ## 排错
 
 - 先跑 `HBX: Diagnose`，确认 HBuilderX 目录、项目目录、vue 版本、编译入口是否都 OK。
-- 找不到 HBuilderX：配置 `hbxPack.hbuilderxPath`。
+- 找不到 HBuilderX：配置 `hbxPack.hbuilderxPath`（本项目）或 `hbxPack.hbuilderxPaths`（全局版本列表）。
 - 编译报缺依赖：确认对应插件（`uniapp-cli` / `uniapp-cli-vite`）已在 HBuilderX 中安装（打开过对应类型项目即会安装）。
 
 ## 已知边界

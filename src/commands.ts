@@ -1,12 +1,12 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
-import { cfg, targetForWorkspace } from './config';
+import { cfg, targetForWorkspace, addHbxPathToList } from './config';
 import { out } from './output';
 import { postConfigToView } from './sidebar';
 import {
   resolveContext, detectHbxRoot, detectProjectDir, readManifest,
-  detectVueVersion, resolveAppPlatform, outputDirFor, appIdOf
+  detectVueVersion, resolveAppPlatform, outputDirFor, appIdOf, isValidHbxRoot
 } from './project';
 import { buildSpec, runBuild, PACK_ACTIONS } from './build';
 
@@ -91,6 +91,10 @@ export function cmdDiagnose(): void {
   if (hbxRoot) {
     out().appendLine('内置 node     : ' + path.join(hbxRoot, 'plugins', 'node', 'node.exe'));
   }
+  const registered = cfg().get<string[]>('hbuilderxPaths') || [];
+  registered.forEach((p, i) => {
+    out().appendLine('版本列表[' + (i + 1) + ']   : ' + p + (isValidHbxRoot(p) ? '' : '  (无效:缺 plugins\\node\\node.exe)'));
+  });
 
   const projectDir = detectProjectDir();
   out().appendLine('项目目录      : ' + (projectDir || '未找到'));
@@ -125,13 +129,48 @@ export function cmdDiagnose(): void {
 
 // ---------- 命令:配置 ----------
 
+const PICK_AUTO = '自动探测(清空本项目指定)';
+const PICK_ADD = '添加新版本路径...';
+
+// 离线打包 SDK 与 HBuilderX 版本绑定,不同项目可能依赖不同版本:
+// 版本路径统一登记在全局 hbuilderxPaths,本命令按项目(工作区)选用其中一个
 export async function cmdSetHbxPath(): Promise<void> {
-  const cur = cfg().get<string>('hbuilderxPath') || '';
-  const v = await vscode.window.showInputBox({ prompt: 'HBuilderX 安装目录(需含 plugins\\node\\node.exe);留空则自动探测', value: cur, ignoreFocusOut: true });
-  if (v === undefined) {
+  const cur = (cfg().get<string>('hbuilderxPath') || '').trim();
+  const registered = cfg().get<string[]>('hbuilderxPaths') || [];
+  // 当前路径可能是旧版全局配置遗留、未登记进列表,也一并展示
+  const paths = cur && !registered.includes(cur) ? [cur, ...registered] : registered;
+
+  const items: vscode.QuickPickItem[] = paths.map(p => ({
+    label: p,
+    description: [p === cur ? '当前' : '', isValidHbxRoot(p) ? '' : '无效:缺 plugins\\node\\node.exe'].filter(Boolean).join('  ')
+  }));
+  items.push({ label: PICK_AUTO, description: cur ? '' : '当前' });
+  items.push({ label: PICK_ADD });
+
+  const pick = await vscode.window.showQuickPick(items, { placeHolder: '选择本项目使用的 HBuilderX 版本;不同项目可各选一个' });
+  if (!pick) {
     return;
   }
-  await cfg().update('hbuilderxPath', v.trim(), vscode.ConfigurationTarget.Global);
+
+  let chosen: string;
+  if (pick.label === PICK_ADD) {
+    const v = await vscode.window.showInputBox({ prompt: 'HBuilderX 安装目录(需含 plugins\\node\\node.exe)', ignoreFocusOut: true });
+    if (!v || !v.trim()) {
+      return;
+    }
+    chosen = v.trim();
+    if (!isValidHbxRoot(chosen)) {
+      vscode.window.showErrorMessage('无效的 HBuilderX 目录(缺 plugins\\node\\node.exe):' + chosen);
+      return;
+    }
+    await addHbxPathToList(chosen);
+  } else if (pick.label === PICK_AUTO) {
+    chosen = '';
+  } else {
+    chosen = pick.label;
+  }
+
+  await cfg().update('hbuilderxPath', chosen, targetForWorkspace());
   postConfigToView();
 }
 

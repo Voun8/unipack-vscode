@@ -2,7 +2,7 @@
   "name": "unipack-vscode",
   "displayName": "UniPack VSCode",
   "description": "Build uni-app via HBuilderX bundled compiler from a VSCode sidebar.",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "publisher": "unipack-vscode",
   "author": "morty",
   "license": "MIT",
@@ -49,7 +49,8 @@
     "configuration": {
       "title": "HBX uni-app Pack",
       "properties": {
-        "hbxPack.hbuilderxPath": { "type": "string", "default": "", "description": "HBuilderX install dir; empty = auto detect" },
+        "hbxPack.hbuilderxPath": { "type": "string", "default": "", "description": "HBuilderX install dir for this project; empty = auto detect (hbuilderxPaths first, then common locations)" },
+        "hbxPack.hbuilderxPaths": { "type": "array", "items": { "type": "string" }, "default": [], "description": "registered HBuilderX install dirs (multiple versions); each project picks one via hbxPack.hbuilderxPath" },
         "hbxPack.projectDir": { "type": "string", "default": "", "description": "uni-app project root; empty = current workspace" },
         "hbxPack.nodeMemoryMB": { "type": "number", "default": 4096, "description": "compile memory limit (MB)" },
         "hbxPack.vueVersion": { "type": "string", "enum": ["auto", "2", "3"], "default": "auto", "description": "compiler: auto / 2 / 3" },
@@ -63,6 +64,7 @@
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
+    "package": "node -e \"const fs=require('fs');fs.rmSync('build',{recursive:true,force:true});fs.mkdirSync('build');\" && npx --yes @vscode/vsce package -o build/",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile && npm run lint",
